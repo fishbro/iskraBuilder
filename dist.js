@@ -1,6 +1,22 @@
 'use strict';
 
-var dht = require("DHT11").connect(A0);
+var pins = {
+    //@ts-ignore
+    tempPin: A0,
+    //@ts-ignore
+    mosi: P8,
+    //@ts-ignore
+    sck: P6,
+    //@ts-ignore
+    dc: P9,
+    //@ts-ignore
+    cs: P5,
+    //@ts-ignore
+    rst: P10
+};
+var dht = require("DHT11")
+    //@ts-ignore
+    .connect(pins.tempPin);
 var timeElapsed, today, time, temp, rh, freeMem;
 var readTemp = function () {
     dht.read(function (a) {
@@ -50,17 +66,18 @@ var draw = function () {
     g.flip();
 };
 var colorPalette = new Uint16Array([0, 0xF80F, 0x001F, 0xFFFF, 0xFF00]);
+//@ts-ignore
 var spi = new SPI();
 spi.setup({
-    mosi: P8,
-    sck: P6 //scl
+    mosi: pins.mosi,
+    sck: pins.sck //scl
 });
 var g = require("ST7735").connect({
     palette: colorPalette,
     spi: spi,
-    dc: P9,
-    cs: P5,
-    rst: P10,
+    dc: pins.dc,
+    cs: pins.cs,
+    rst: pins.rst,
     height: 160 // optional, default=128
     // padx : 2 // optional, default=0
     // pady : 3 // optional, default=0

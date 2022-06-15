@@ -1,7 +1,32 @@
 //@ts-ignore
 import tween from "micro-tween";
 
-var dht = require("DHT11").connect(A0);
+
+const pins: {
+    tempPin: Pin,
+    mosi: Pin,
+    sck: Pin,
+    dc: Pin,
+    cs: Pin,
+    rst: Pin,
+} = {
+    //@ts-ignore
+    tempPin: A0,
+    //@ts-ignore
+    mosi: P8, //sda
+    //@ts-ignore
+    sck: P6, //scl
+    //@ts-ignore
+    dc: P9,
+    //@ts-ignore
+    cs: P5,
+    //@ts-ignore
+    rst: P10
+}
+
+var dht = require("DHT11")
+    //@ts-ignore
+    .connect(pins.tempPin);
 var timeElapsed,
     today,
     time: any,
@@ -10,7 +35,7 @@ var timeElapsed,
     freeMem: any;
 
 var readTemp = () => {
-    dht.read((a) => {
+    dht.read((a:{temp: number, rh:number}) => {
         temp = a.temp.toString();
         rh = a.rh.toString();
     });
@@ -66,17 +91,18 @@ var draw = () => {
 };
 
 var colorPalette = new Uint16Array([0, 0xF80F, 0x001F, 0xFFFF, 0xFF00]);
-var spi = new SPI();
+//@ts-ignore
+var spi: SPI = new SPI();
 spi.setup({
-    mosi:P8, //sda
-    sck:P6 //scl
+    mosi:pins.mosi, //sda
+    sck:pins.sck //scl
 });
 var g = require("ST7735").connect({
     palette:colorPalette,
     spi:spi,
-    dc:P9,
-    cs:P5,
-    rst:P10,
+    dc:pins.dc,
+    cs:pins.cs,
+    rst:pins.rst,
     height : 160 // optional, default=128
     // padx : 2 // optional, default=0
     // pady : 3 // optional, default=0
