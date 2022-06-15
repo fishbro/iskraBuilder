@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "start": "concurrently --raw \"npm:build\" \"npm:watch\"",
+    "build": "gulp",
+    "watch": "espruino --no-ble -b 115200 -t -d \"STMicroelectronics\" --watch dist.js",
+    "watch-min": "espruino --no-ble -b 115200 -m -t -d \"STMicroelectronics\" --watch dist.js",
+    "list": "espruino --no-ble --list"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "concurrently": "^7.2.2",
+    "espruino": "^0.1.43",
+    "gulp": "^4.0.2",
+    "rollup": "^2.75.6"
+  },
+  "dependencies": {
+    "@types/espruino": "^1.94.7",
+    "micro-tween": "^0.0.1"
+  }
+}
