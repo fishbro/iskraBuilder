@@ -2,12 +2,16 @@
   "compilerOptions": {
     "target": "es5",
     "module": "esnext",
+    "moduleResolution": "node",
     "lib": [
       "es2015",
-      "dom"
+      "dom",
+      "espruino"
     ],
     "strict": true,
-    "typeRoots": ["./node_modules/@types"],
+    "typeRoots": [
+      "./node_modules/@types/"
+    ],
     "types": ["espruino", "node"]
   },
   "include": [
