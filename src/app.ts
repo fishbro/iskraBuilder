@@ -1,5 +1,3 @@
-import espruino from "@types/espruino";
-
 var dht = require("DHT11").connect(A0);
 var timeElapsed,
     today,

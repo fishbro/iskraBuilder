@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Titans 3 Client.iml" filepath="$PROJECT_DIR$/.idea/Titans 3 Client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/iskraBuilder.iml" filepath="$PROJECT_DIR$/.idea/iskraBuilder.iml" />
     </modules>
   </component>
 </project>

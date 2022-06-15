@@ -9,10 +9,13 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^22.0.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-typescript": "^8.3.3",
     "concurrently": "^7.2.2",
     "espruino": "^0.1.43",
     "gulp": "^4.0.2",
-    "rollup": "^2.75.6"
+    "rollup": "^2.75.6",
+    "tslib": "^2.4.0",
+    "typescript": "^4.7.3"
   },
   "dependencies": {
     "@types/espruino": "^1.94.7",
