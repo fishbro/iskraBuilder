@@ -1,12 +1,13 @@
-// import tween from "micro-tween";
+//@ts-ignore
+import tween from "micro-tween";
 
 var dht = require("DHT11").connect(A0);
 var timeElapsed,
     today,
-    time,
-    temp,
-    rh,
-    freeMem;
+    time: any,
+    temp: any,
+    rh: any,
+    freeMem: any;
 
 var readTemp = () => {
     dht.read((a) => {
@@ -23,6 +24,7 @@ var readTime = () => {
 };
 
 var readMem = () => {
+    //@ts-ignore
     freeMem = process.memory().free;
 };
 
@@ -82,7 +84,6 @@ var g = require("ST7735").connect({
     drawIntro();
     setInterval(draw, 2000);
 });
-
 
 //save();
 //reset();
