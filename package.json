@@ -1,9 +1,10 @@
 {
   "scripts": {
-    "start": "concurrently --raw \"npm:build\" \"npm:watch\"",
-    "build": "gulp",
+    "start": "concurrently --raw \"npm:buildWatch\" \"npm:watch\"",
+    "build": "gulp ts",
+    "buildWatch": "gulp",
     "watch": "espruino --no-ble -b 115200 -t -d \"STMicroelectronics\" --watch dist.js",
-    "watch-min": "espruino --no-ble -b 115200 -m -t -d \"STMicroelectronics\" --watch dist.js",
+    "flash": "espruino --no-ble --config SAVE_ON_SEND=true -b 115200 -t -d \"STMicroelectronics\" dist.js",
     "list": "espruino --no-ble --list"
   },
   "devDependencies": {
