@@ -1,5 +1,5 @@
 //@ts-ignore
-import tween from "micro-tween";
+import * as tween from "micro-tween";
 import IskraScreen from "./core/IskraScreen";
 
 const pins: {
