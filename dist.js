@@ -26,7 +26,7 @@ var __assign = function() {
     return __assign.apply(this, arguments);
 };
 
-var lib = require("/libs/ST7735");
+var lib$1 = require("/libs/ST7735");
 var IskraScreen = /** @class */ (function () {
     function IskraScreen(props) {
         var _this = this;
@@ -42,7 +42,7 @@ var IskraScreen = /** @class */ (function () {
             _this.screen.setFontVector(size);
             _this.screen.drawString(text, x, y);
         };
-        this.screen = lib.connect(__assign(__assign({}, props), { palette: this.palette, height: this.height }), function () {
+        this.screen = lib$1.connect(__assign(__assign({}, props), { palette: this.palette, height: this.height }), function () {
             _this.drawIntro();
         });
     }
@@ -62,6 +62,38 @@ var IskraScreen = /** @class */ (function () {
     return IskraScreen;
 }());
 
+var lib = require("/libs/DHT11");
+var IskraTemp = /** @class */ (function () {
+    function IskraTemp(pin) {
+        this.dht = null;
+        this.dht = lib.connect(pin);
+    }
+    IskraTemp.prototype.readTemp = function () {
+        var _this = this;
+        return new Promise(function (resolve) {
+            _this.dht.read(function (data) {
+                resolve({ temp: data.temp.toString(), rh: data.rh.toString() });
+            });
+        });
+    };
+    return IskraTemp;
+}());
+
+var IskraHelpers = /** @class */ (function () {
+    function IskraHelpers() {
+    }
+    IskraHelpers.readTime = function () {
+        var timeElapsed = Date.now();
+        timeElapsed += 3 * 3600 * 1000;
+        return new Date(timeElapsed).toISOString().split("T");
+    };
+    IskraHelpers.readMem = function () {
+        //@ts-ignore
+        return process.memory().free;
+    };
+    return IskraHelpers;
+}());
+
 var pins = {
     //@ts-ignore
     tempPin: A0,
@@ -76,9 +108,6 @@ var pins = {
     //@ts-ignore
     rst: P10
 };
-require("DHT11")
-    //@ts-ignore
-    .connect(pins.tempPin);
 //@ts-ignore
 var spi = new SPI();
 spi.setup({
@@ -91,7 +120,10 @@ var screen = new IskraScreen({
     cs: pins.cs,
     rst: pins.rst
 });
+var temp = new IskraTemp(pins.tempPin);
 setTimeout(function () {
     screen.showText("Initialized", [0, 150]);
     screen.g.flip();
+    console.log(IskraHelpers.readMem(), IskraHelpers.readTime());
+    temp.readTemp().then(function (data) { return console.log(data); });
 }, 2000);

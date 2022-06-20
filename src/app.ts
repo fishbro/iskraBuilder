@@ -1,6 +1,8 @@
 //@ts-ignore
 import * as tween from "micro-tween";
 import IskraScreen from "./core/IskraScreen";
+import IskraTemp from "./core/IskraTemp";
+import IskraHelpers from "./core/IskraHelpers";
 
 const pins: {
     tempPin: Pin;
@@ -23,33 +25,8 @@ const pins: {
     //@ts-ignore
     rst: P10
 };
-
-var dht = require("DHT11")
-    //@ts-ignore
-    .connect(pins.tempPin);
-var timeElapsed, today, time: any, temp: any, rh: any, freeMem: any;
-
-var readTemp = () => {
-    dht.read((a: { temp: number; rh: number }) => {
-        temp = a.temp.toString();
-        rh = a.rh.toString();
-    });
-};
-
-var readTime = () => {
-    timeElapsed = Date.now();
-    timeElapsed += 3 * 3600 * 1000;
-    today = new Date(timeElapsed);
-    time = today.toISOString().split("T");
-};
-
-var readMem = () => {
-    //@ts-ignore
-    freeMem = process.memory().free;
-};
 //@ts-ignore
-var spi: SPI = new SPI();
-
+const spi: SPI = new SPI();
 spi.setup({
     mosi: pins.mosi, //sda
     sck: pins.sck //scl
@@ -62,7 +39,12 @@ const screen = new IskraScreen({
     rst: pins.rst
 });
 
+const temp = new IskraTemp(pins.tempPin);
+
 setTimeout(() => {
     screen.showText("Initialized", [0, 150]);
     screen.g.flip();
+
+    console.log(IskraHelpers.readMem(), IskraHelpers.readTime());
+    temp.readTemp().then(data => console.log(data));
 }, 2000);
