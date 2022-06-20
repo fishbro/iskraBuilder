@@ -1,31 +1,68 @@
 'use strict';
 
-const lib = require("/libs/ST7735");
-class IskraScreen {
-    constructor(props) {
-        this.palette = new Uint16Array([0, 0xF80F, 0x001F, 0xFFFF, 0xFF00]);
+/******************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+
+var lib = require("/libs/ST7735");
+var IskraScreen = /** @class */ (function () {
+    function IskraScreen(props) {
+        var _this = this;
+        this.palette = new Uint16Array([0, 0xf80f, 0x001f, 0xffff, 0xff00]);
         this.screen = null;
         this.pins = null;
         this.height = 160;
-        this.screen = lib.connect(Object.assign(Object.assign({}, props), { palette: this.palette, height: this.height }), () => {
-            this.drawIntro();
+        this.showText = function (text, coords, options) {
+            if (options === void 0) { options = { size: 10, color: 1 }; }
+            var _a = options.size, size = _a === void 0 ? 10 : _a, _b = options.color, color = _b === void 0 ? 1 : _b;
+            var x = coords[0], y = coords[1];
+            _this.screen.setColor(color);
+            _this.screen.setFontVector(size);
+            _this.screen.drawString(text, x, y);
+        };
+        this.screen = lib.connect(__assign(__assign({}, props), { palette: this.palette, height: this.height }), function () {
+            _this.drawIntro();
         });
     }
-    drawIntro() {
+    IskraScreen.prototype.drawIntro = function () {
         this.screen.clear();
-        this.screen.setColor(3);
-        this.screen.drawString("Hello", 0, 0);
-        this.screen.setFontVector(20);
-        this.screen.setColor(4);
-        this.screen.drawString("Espruino", 0, 10);
+        this.showText("Hello", [0, 0], { color: 3 });
+        this.showText("Espruino", [0, 10], { size: 20, color: 4 });
         this.screen.flip(); //<--- Send to the display
-    }
-    get s() {
-        return this.screen;
-    }
-}
+    };
+    Object.defineProperty(IskraScreen.prototype, "g", {
+        get: function () {
+            return this.screen;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return IskraScreen;
+}());
 
-const pins = {
+var pins = {
     //@ts-ignore
     tempPin: A0,
     //@ts-ignore
@@ -48,9 +85,13 @@ spi.setup({
     mosi: pins.mosi,
     sck: pins.sck //scl
 });
-new IskraScreen({
+var screen = new IskraScreen({
     spi: spi,
     dc: pins.dc,
     cs: pins.cs,
-    rst: pins.rst,
+    rst: pins.rst
 });
+setTimeout(function () {
+    screen.showText("Initialized", [0, 150]);
+    screen.g.flip();
+}, 2000);
