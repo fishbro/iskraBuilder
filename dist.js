@@ -27,30 +27,59 @@ var __assign = function() {
 };
 
 var lib$1 = require("/libs/ST7735");
+//@ts-ignore
+require("/libs/Font6x8").add(Graphics);
 var IskraScreen = /** @class */ (function () {
     function IskraScreen(props) {
         var _this = this;
         this.palette = new Uint16Array([0, 0xf80f, 0x001f, 0xffff, 0xff00]);
         this.screen = null;
         this.pins = null;
+        this.width = 128;
         this.height = 160;
+        this.background = 0;
         this.showText = function (text, coords, options) {
             if (options === void 0) { options = { size: 10, color: 1 }; }
-            var _a = options.size, size = _a === void 0 ? 10 : _a, _b = options.color, color = _b === void 0 ? 1 : _b;
+            options.size; var _b = options.color, color = _b === void 0 ? 1 : _b;
             var x = coords[0], y = coords[1];
+            _this.screen.setColor(_this.background);
+            _this.screen.fillRect(x, y, x + text.toString().length * 6, y + 8);
             _this.screen.setColor(color);
-            _this.screen.setFontVector(size);
+            // this.screen.setFontVector(size);
             _this.screen.drawString(text, x, y);
         };
-        this.screen = lib$1.connect(__assign(__assign({}, props), { palette: this.palette, height: this.height }), function () {
-            _this.drawIntro();
-        });
+        this.pins = props;
     }
+    IskraScreen.prototype.init = function () {
+        var _this = this;
+        return new Promise(function (resolve) {
+            _this.screen = lib$1.connect(__assign(__assign({}, _this.pins), { palette: _this.palette, height: _this.height }), resolve);
+            _this.screen.setFont6x8();
+        });
+    };
     IskraScreen.prototype.drawIntro = function () {
-        this.screen.clear();
-        this.showText("Hello", [0, 0], { color: 3 });
-        this.showText("Espruino", [0, 10], { size: 20, color: 4 });
-        this.screen.flip(); //<--- Send to the display
+        var _this = this;
+        return new Promise(function (resolve) {
+            _this.screen.clear();
+            _this.showText("Hello", [0, 0], { color: 3 });
+            _this.showText("Espruino", [0, 10], { color: 4 });
+            _this.send(); //<--- Send to the display
+            var loader = ["\\", "|", "/", "-"];
+            var loaderPos = 0;
+            var loaderInterval = setInterval(function () {
+                _this.showText(loader[loaderPos], [0, 150]);
+                _this.send();
+                loaderPos++;
+                if (loaderPos === loader.length)
+                    loaderPos = 0;
+            }, 10);
+            setTimeout(function () {
+                clearInterval(loaderInterval);
+                _this.showText("Initialized", [0, 150]);
+                _this.send();
+                resolve();
+            }, 1000);
+        });
     };
     Object.defineProperty(IskraScreen.prototype, "g", {
         get: function () {
@@ -59,6 +88,15 @@ var IskraScreen = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    IskraScreen.prototype.send = function () {
+        this.screen.flip();
+    };
+    IskraScreen.prototype.clear = function () {
+        this.screen.clear();
+        this.screen.setColor(this.background);
+        this.screen.fillRect(0, 0, this.width, this.height);
+        this.send();
+    };
     return IskraScreen;
 }());
 
@@ -79,20 +117,20 @@ var IskraTemp = /** @class */ (function () {
     return IskraTemp;
 }());
 
-var IskraHelpers = /** @class */ (function () {
-    function IskraHelpers() {
-    }
-    IskraHelpers.readTime = function () {
-        var timeElapsed = Date.now();
-        timeElapsed += 3 * 3600 * 1000;
-        return new Date(timeElapsed).toISOString().split("T");
-    };
-    IskraHelpers.readMem = function () {
-        //@ts-ignore
-        return process.memory().free;
-    };
-    return IskraHelpers;
-}());
+var readTime = function () {
+    var timeElapsed = Date.now();
+    timeElapsed += 3 * 3600 * 1000;
+    return new Date(timeElapsed).toISOString().split("T");
+};
+var readMem = function () {
+    //@ts-ignore
+    return process.memory().free;
+};
+var wait = function (ms) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, ms);
+    });
+};
 
 var pins = {
     //@ts-ignore
@@ -121,9 +159,26 @@ var screen = new IskraScreen({
     rst: pins.rst
 });
 var temp = new IskraTemp(pins.tempPin);
-setTimeout(function () {
-    screen.showText("Initialized", [0, 150]);
-    screen.g.flip();
-    console.log(IskraHelpers.readMem(), IskraHelpers.readTime());
-    temp.readTemp().then(function (data) { return console.log(data); });
-}, 2000);
+screen.init().then(function () {
+    screen.drawIntro().then(function () {
+        screen.clear();
+        setInterval(function () {
+            var _a = readTime(), date = _a[0], time = _a[1];
+            screen.showText(date, [0, 0]);
+            screen.showText(time.slice(0, 8), [date.length * 6 + 10, 0]);
+            screen.showText(readMem(), [0, 160 - 8]);
+            screen.send();
+        }, 100);
+        var setTemp = function () {
+            temp.readTemp()
+                .then(function (data) {
+                console.log("set temp");
+                screen.showText("Cur temp: " + data.temp, [0, 160 - 28]);
+                screen.showText("Cur rh: " + data.rh, [0, 160 - 18]);
+                screen.send();
+            })
+                .then(function () { return wait(5000).then(setTemp); });
+        };
+        setTemp();
+    });
+});

@@ -8,7 +8,7 @@ export default class IskraTemp {
     }
 
     readTemp() {
-        return new Promise(resolve => {
+        return new Promise<{ temp: string; rh: string }>(resolve => {
             this.dht.read((data: { temp: number; rh: number }) => {
                 resolve({ temp: data.temp.toString(), rh: data.rh.toString() });
             });

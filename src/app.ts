@@ -2,7 +2,7 @@
 import * as tween from "micro-tween";
 import IskraScreen from "./core/IskraScreen";
 import IskraTemp from "./core/IskraTemp";
-import IskraHelpers from "./core/IskraHelpers";
+import { readTime, readMem, wait } from "./core/IskraHelpers";
 
 const pins: {
     tempPin: Pin;
@@ -41,10 +41,30 @@ const screen = new IskraScreen({
 
 const temp = new IskraTemp(pins.tempPin);
 
-setTimeout(() => {
-    screen.showText("Initialized", [0, 150]);
-    screen.g.flip();
+screen.init().then(() => {
+    screen.drawIntro().then(() => {
+        screen.clear();
 
-    console.log(IskraHelpers.readMem(), IskraHelpers.readTime());
-    temp.readTemp().then(data => console.log(data));
-}, 2000);
+        setInterval(() => {
+            const [date, time] = readTime();
+            screen.showText(date, [0, 0]);
+            screen.showText(time.slice(0, 8), [date.length * 6 + 10, 0]);
+            screen.showText(readMem(), [0, 160 - 8]);
+
+            screen.send();
+        }, 100);
+
+        const setTemp = () => {
+            temp.readTemp()
+                .then(data => {
+                    console.log("set temp");
+                    screen.showText("Cur temp: " + data.temp, [0, 160 - 28]);
+                    screen.showText("Cur rh: " + data.rh, [0, 160 - 18]);
+                    screen.send();
+                })
+                .then(() => wait(5000).then(setTemp));
+        };
+
+        setTemp();
+    });
+});
