@@ -49,15 +49,14 @@ screen.init().then(() => {
             const [date, time] = readTime();
             screen.showText(date, [0, 0]);
             screen.showText(time.slice(0, 8), [date.length * 6 + 10, 0]);
-            screen.showText(readMem(), [0, 160 - 8]);
+            screen.showText("Free mem: " + readMem(), [0, 160 - 8]);
 
             screen.send();
-        }, 100);
+        }, 1000);
 
         const setTemp = () => {
             temp.readTemp()
                 .then(data => {
-                    console.log("set temp");
                     screen.showText("Cur temp: " + data.temp, [0, 160 - 28]);
                     screen.showText("Cur rh: " + data.rh, [0, 160 - 18]);
                     screen.send();
