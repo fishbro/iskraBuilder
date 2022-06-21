@@ -1,8 +1,6 @@
-import logDebug = ESP8266.logDebug;
-
 const lib = require("/libs/ST7735");
 //@ts-ignore
-const font = require("/libs/Font6x8").add(Graphics);
+require("/libs/Font6x8").add(Graphics);
 
 export type ScreenPins = {
     spi: SPI;
@@ -12,7 +10,7 @@ export type ScreenPins = {
 };
 
 export default class IskraScreen {
-    palette = new Uint16Array([0, 0xf80f, 0x001f, 0xffff, 0xff00]);
+    palette = new Uint16Array([0, 0xf80f, 0x001f, 0xffff, 0x1111]);
     screen = null;
     pins: ScreenPins | null = null;
     width = 128;
@@ -41,7 +39,7 @@ export default class IskraScreen {
         return new Promise<void>(resolve => {
             this.screen.clear();
             this.showText("Hello", [0, 0], { color: 3 });
-            this.showText("Espruino", [0, 10], { color: 4 });
+            this.showText("Espruino", [0, 10], { color: 1 });
             this.send(); //<--- Send to the display
 
             const loader = ["\\", "|", "/", "-"];
@@ -66,16 +64,15 @@ export default class IskraScreen {
         text: string,
         coords: [number, number],
         options: {
-            size?: number;
+            bgColor?: number;
             color?: number | string;
-        } = { size: 10, color: 1 }
+        } = { bgColor: 0, color: 1 }
     ) => {
-        const { size = 10, color = 1 } = options;
+        const { bgColor = 0, color = 1 } = options;
         const [x, y] = coords;
-        this.screen.setColor(this.background);
+        this.screen.setColor(bgColor);
         this.screen.fillRect(x, y, x + text.toString().length * 6, y + 8);
         this.screen.setColor(color);
-        // this.screen.setFontVector(size);
         this.screen.drawString(text, x, y);
     };
 

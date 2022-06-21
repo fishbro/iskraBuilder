@@ -47,8 +47,14 @@ screen.init().then(() => {
 
         setInterval(() => {
             const [date, time] = readTime();
-            screen.showText(date, [0, 0]);
-            screen.showText(time.slice(0, 8), [date.length * 6 + 10, 0]);
+            screen.g.setColor(4);
+            screen.g.fillRect(0, 0, 128, 8);
+            screen.showText(date, [0, 0], {
+                bgColor: 4
+            });
+            screen.showText(time.slice(0, 8), [date.length * 6 + 10, 0], {
+                bgColor: 4
+            });
             screen.showText("Free mem: " + readMem(), [0, 160 - 8]);
 
             screen.send();
